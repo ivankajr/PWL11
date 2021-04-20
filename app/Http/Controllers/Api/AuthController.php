@@ -24,4 +24,21 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
+    public function login(LoginRequest $request)
+    {
+        $validated = $request->validated();
+
+        if (!Auth::attempt($validated)) {
+            return $this->apiError('Credentials no match', HttpFoundationResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $user = User::where('email', $validated['email'])->first();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->apiSuccess([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user,
+        ]);
+    }
 }
